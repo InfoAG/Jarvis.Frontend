@@ -80,6 +80,16 @@ void JarvisClient::readyRead()
                 connectionState = Loop;
             } else return;
             break;
+        case LeaveScope:
+            if (receiveString(buffer)) connectionState = LeaveClient;
+            else return;
+            break;
+        case LeaveClient:
+            if (receiveString(buffer_2)) {
+                emit clientLeft(buffer, buffer_2);
+                connectionState = Loop;
+            } else return;
+            break;
         case FuncScope:
             if (receiveString(buffer)) connectionState = FuncDef;
             else return;
@@ -135,7 +145,7 @@ void JarvisClient::enterScope(const QString &name)
     else {
         stream << static_cast<quint8>(0) << name;
         buffer = name;
-        connectionState = ScopeInfo;
+        connectionState = Loop;//ScopeInfo;
     }
 }
 

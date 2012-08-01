@@ -22,6 +22,7 @@ public slots:
     void newFunction(const QString &scope, const QString &def);
     void newVariable(const QString &scope, const QString &def);
     void newClient(const QString &scope, const QString &name);
+    void clientLeft(const QString &scope, const QString &name);
     void msgInScope(const QString &scope, const QString &sender, const QString &msg);
     void error(JarvisClient::ClientError error);
     
