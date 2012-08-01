@@ -1,10 +1,12 @@
 import QtQuick 1.1
 import Qt 4.7
 
-/*Rectangle
+
+Rectangle
 {
     width: 1000
-    height: 1000*/
+    height: 500
+
 
 Rectangle
 {
@@ -16,8 +18,13 @@ Rectangle
     border.color: "#30e4d4"
     border.width: 2
     z: 1
-    color: "#003399"
-    opacity: 0.8
+
+
+    Image
+    {
+        anchors.fill: parent
+        source: "images/Backgroundraster.jpg"
+    }
 
     Rectangle
     {
@@ -28,8 +35,7 @@ Rectangle
         border.width: 2
         z:2
         width: 100; height: 370
-        color: "#003399"
-        opacity: 0.8
+        color: "transparent"
     }
 
     Rectangle
@@ -42,8 +48,7 @@ Rectangle
         border.width: 2
         z:2
         width: 600 ; height: 370
-        color: "#003399"
-        opacity: 0.8
+        color: "transparent"
     }
 
 
@@ -55,8 +60,7 @@ Rectangle
         id: variables
         z:2
         width: 96; height: 370
-        color: "#003399"
-        opacity: 0.8
+        color: "transparent"
     }
 
 
@@ -67,11 +71,10 @@ Rectangle
         id: input
         border.width: 2;
         border.color: "#30e4d4"
-        color: "#b0b0b0"
-        opacity: 0.8
         z:2
         width: serverlist.width + output.anchors.leftMargin + output.width
         height: 30
+        color: "transparent"
 
         Textarea{textwidth: serverlist.width + output.anchors.leftMargin + output.width; textheight: 30}
 
@@ -84,77 +87,27 @@ Rectangle
         anchors.top: variables.bottom
         anchors.topMargin: 5
         anchors.leftMargin: 2
-        color: "#003399"
         z:2
-        Button { text: "process"}
-    }
-
-    Rectangle //resizerec
-    {
-        id: resizerec
-        anchors.right: mainrec.right
-        anchors.bottom: mainrec.bottom
-        color: "#003399"
-        width: 20; height: 20
-        border.color: "#30e4d4"
-        border.width: 2
+        color: "transparent"
+        width: mainrec.width-input.width-2*mainrec.border.width
+        height: 30
 
         Image
         {
-            source: "images/resize_icon.png"
+            id: buttonimage
             anchors.fill: parent
+            source: "images/button_0.png"
 
         }
 
-        MouseArea
-        {
-            anchors.fill: parent
-            onPressed: {
+        MouseArea{id: mouseArea; anchors.fill: parent}
 
-
-            }
+        states: State {
+                     name: "down"; when: mouseArea.pressed === true
+                     PropertyChanges{ target: buttonimage; source: "images/button_1.png"}
         }
-
-    }
-
-    Rectangle //moverec
-    {
-        id: moverec
-        anchors.right: resizerec.left
-        anchors.bottom: mainrec.bottom
-        color: "#003399"
-        width: 20; height: 20
-        border.color: "#30e4d4"
-        border.width: 2
-
-        Image
-        {
-            source: "images/move_icon.png"
-            anchors.fill: parent
-
-        }
-
-        MouseArea
-        {
-            id: mouseRegion
-            anchors.fill: parent;
-            property variant clickPos: "1,1"
-
-            onPressed: {
-                clickPos  = Qt.point(mouse.x,mouse.y)
-            }
-
-            onPositionChanged: {
-                var delta = Qt.point(mouse.x-clickPos.x, mouse.y-clickPos.y)
-                mainrec.pos = Qt.point(mainrec.pos.x+delta.x,
-                                  mainrec.pos.y+delta.y)
-            }
-        }
-
     }
 
 }
 
-
-
-//}
+}
