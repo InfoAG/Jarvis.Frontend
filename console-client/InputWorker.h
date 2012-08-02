@@ -26,7 +26,13 @@ public slots:
             if (input.startsWith("/enter ")) QMetaObject::invokeMethod(&client, "enterScope", Q_ARG(QString, input.right(input.length() - 7)));
             else if (input.startsWith("/leave ")) QMetaObject::invokeMethod(&client, "leaveScope", Q_ARG(QString, input.right(input.length() - 7)));
             else if (input.startsWith("/open ")) currentScope = input.right(input.length() - 6);
-            else QMetaObject::invokeMethod(&client, "msgToScope", Q_ARG(QString, currentScope), Q_ARG(QString, input));
+            else if (input == "/clients") {
+                QList<QString> scopeClients = client.userLists[currentScope];
+                std::for_each(scopeClients.begin(), scopeClients.end(), [&](const QString &it_client) {
+                        qtout << it_client << "\t";
+                    });
+                qtout << endl;
+            } else QMetaObject::invokeMethod(&client, "msgToScope", Q_ARG(QString, currentScope), Q_ARG(QString, input));
         }
     }
 };

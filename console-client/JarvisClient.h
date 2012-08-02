@@ -34,22 +34,32 @@ private:
         String
     } stringReceiveState = StringSize;
 
+    enum {
+        ListSize,
+        ItemSize,
+        ItemBody
+    } listReceiveState = ListSize;
+
     QTcpSocket socket;
     QDataStream stream;
     QString name;
     QString pwd;
     quint8 serverVersion;
-    QString buffer;
+    QString buffer, buffer_2;
     quint32 nextBlockSize;
-    QMap<QString, QList<QString> > userLists;
+    quint32 itemBlockSize;
+    QByteArray listBuffer;
+    QDataStream listStream;
 
     bool receiveString(QString &dest);
+    bool receiveStringList(QList<QString> &dest);
 
 public:
     enum ClientError {
         BadLogin,
         WrongVersion
     };
+    QMap<QString, QList<QString> > userLists;
 
     JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd);
     void connect(const QString &server, quint16 port, const QString &name, const QString &pwd);

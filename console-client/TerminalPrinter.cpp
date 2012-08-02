@@ -13,35 +13,35 @@ TerminalPrinter::TerminalPrinter(JarvisClient &client) : client(client)
 
 void TerminalPrinter::newScope(const QString &name)
 {
-    std::cout << "New Scope:\t" << name.toStdString() << std::endl;
+    std::cout << std::endl << "New Scope:\t" << name.toStdString() << std::endl;
 }
 
 void TerminalPrinter::newFunction(const QString &scope, const QString &def)
 {
-    std::cout << "New function definition (scope " << scope.toStdString() << "):\t" << def.toStdString() << std::endl;
+    std::cout << std::endl << "New function definition (scope " << scope.toStdString() << "):\t" << def.toStdString() << std::endl;
 }
 
 void TerminalPrinter::newVariable(const QString &scope, const QString &def)
 {
-    std::cout << "New variable definition (scope " << scope.toStdString() << "):\t" << def.toStdString() << std::endl;
+    std::cout << std::endl << "New variable definition (scope " << scope.toStdString() << "):\t" << def.toStdString() << std::endl;
 }
 
 void TerminalPrinter::newClient(const QString &scope, const QString &name)
 {
-    std::cout << "New client (scope " << scope.toStdString() << "):\t" << name.toStdString() << std::endl;
+    std::cout << std::endl << "New client (scope " << scope.toStdString() << "):\t" << name.toStdString() << std::endl;
 }
 
 void TerminalPrinter::clientLeft(const QString &scope, const QString &name)
 {
-    std::cout << "Client left (scope " << scope.toStdString() << "):\t" << name.toStdString() << std::endl;
+    std::cout << std::endl << "Client left (scope " << scope.toStdString() << "):\t" << name.toStdString() << std::endl;
 }
 
 void TerminalPrinter::msgInScope(const QString &scope, const QString &sender, const QString &msg)
 {
-    std::cout << scope.toStdString() << " << " << sender.toStdString() << ":\t" << msg.toStdString() << std::endl;
+    std::cout << std::endl << scope.toStdString() << " << " << sender.toStdString() << ":\t" << msg.toStdString() << std::endl;
 }
 
 void TerminalPrinter::error(JarvisClient::ClientError error)
 {
-    std::cout << "Client Error " << error << std::endl;
+    std::cout << std::endl << "Client Error " << error << std::endl;
 }

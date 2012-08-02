@@ -1,6 +1,6 @@
 #include "JarvisClient.h"
 
-JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : stream(&socket)
+JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : stream(&socket), listStream(&listBuffer, QIODevice::ReadOnly)
 {
     QObject::connect(&socket, SIGNAL(connected()), this, SLOT(connected()));
     QObject::connect(&socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
@@ -23,25 +23,56 @@ void JarvisClient::connected()
 bool JarvisClient::receiveString(QString &dest)
 {
     do {
-    if (stringReceiveState == StringSize) {
-        if (socket.bytesAvailable() >= sizeof(quint32)) {
-            QDataStream(socket.peek(sizeof(quint32))) >> nextBlockSize;
-            nextBlockSize += sizeof(quint32);
-            stringReceiveState = String;
+        if (stringReceiveState == StringSize) {
+            if (socket.bytesAvailable() >= sizeof(quint32)) {
+                QDataStream(socket.peek(sizeof(quint32))) >> nextBlockSize;
+                nextBlockSize += sizeof(quint32);
+                stringReceiveState = String;
+            } else return false;
+        } else {
+            if (socket.bytesAvailable() >= nextBlockSize) {
+                stream >> dest;
+                stringReceiveState = StringSize;
+                return true;
+            } else return false;
+        }
+    } while (socket.bytesAvailable());
+}
+
+bool JarvisClient::receiveStringList(QList<QString> &dest)
+{
+    do {
+        if (listReceiveState == ListSize) {
+            if (socket.bytesAvailable() >= sizeof(quint32)) {
+                listBuffer += socket.read(sizeof(quint32));
+                listStream.device()->reset();
+                listStream >> nextBlockSize;
+                if (! nextBlockSize) {
+                    dest = QList<QString>();
+                    return true;
+                } else listReceiveState = ItemSize;
+            } else return false;
+        } else if (listReceiveState == ItemSize) {
+            if (socket.bytesAvailable() >= sizeof(quint32)) {
+                QDataStream(socket.peek(sizeof(quint32))) >> itemBlockSize;
+                listBuffer +=  socket.read(sizeof(quint32));
+                listReceiveState = ItemBody;
+            } else return false;
+        } else if (socket.bytesAvailable() >= itemBlockSize) {
+            listBuffer +=  socket.read(itemBlockSize);
+            if (! --nextBlockSize) {
+                listStream.device()->reset();
+                listStream >> dest;
+                listReceiveState = ListSize;
+                return true;
+            } else listReceiveState = ItemSize;
         } else return false;
-    } else {
-        if (socket.bytesAvailable() >= nextBlockSize) {
-            stream >> dest;
-            stringReceiveState = StringSize;
-            return true;
-        } else return false;
-    }
     } while (socket.bytesAvailable());
 }
 
 void JarvisClient::readyRead()
 {
-    QString buffer_2, buffer_3;
+    QString buffer_3;
     do {
         switch (connectionState) {
         case Version:
@@ -131,8 +162,8 @@ void JarvisClient::readyRead()
             } else return;
             break;
         case ScopeInfo:
-            stream >> userLists[buffer];
-            if (stream.status() == QDataStream::Ok) connectionState = Loop;
+            if (receiveStringList(userLists[buffer])) connectionState = Loop;
+            else return;
             break;
         }
     } while (socket.bytesAvailable());
@@ -145,7 +176,7 @@ void JarvisClient::enterScope(const QString &name)
     else {
         stream << static_cast<quint8>(0) << name;
         buffer = name;
-        connectionState = Loop;//ScopeInfo;
+        connectionState = ScopeInfo;
     }
 }
 

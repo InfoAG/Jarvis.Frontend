@@ -9,10 +9,14 @@ int main(int argc, char *argv[])
     QTextStream qtout(stdout);
     QTextStream qtin(stdin);
     QString nick;
-    qtout << "Choose nick:\t";
+    QString server;
+    qtout << "Server:\t";
+    qtout.flush();
+    qtin >> server;
+    qtout << "Nick:\t";
     qtout.flush();
     qtin >> nick;
-    JarvisClient client("localhost", 4200, nick, "supersecret");
+    JarvisClient client(server, 4200, nick, "supersecret");
     TerminalPrinter tp(client);
     QThread thread;
     Worker worker(client);
