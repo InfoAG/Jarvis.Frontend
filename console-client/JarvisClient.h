@@ -26,17 +26,6 @@ private:
         Modules
     } connectionState;
 
-    enum {
-        StringSize,
-        String
-    } stringReceiveState = StringSize;
-
-    enum {
-        ListSize,
-        ItemSize,
-        ItemBody
-    } listReceiveState = ListSize;
-
     QTcpSocket socket;
     QDataStream iStream, oStream, sendQueueStream;
     QString name;
@@ -82,6 +71,8 @@ public slots:
     void leaveScope(const QString &);
     void msgToScope(const QString &, const QString &);
     void requestModules();
+    void unloadPkg(const QString &);
+    void loadPkg(const QString &);
 };
 
 #endif // JARVISCLIENT_H

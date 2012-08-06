@@ -153,3 +153,15 @@ void JarvisClient::requestModules()
     addedToQueue();
     connectionState = Modules;
 }
+
+void JarvisClient::unloadPkg(const QString &module)
+{
+    sendQueueStream << static_cast<quint8>(4) << module;
+    addedToQueue();
+}
+
+void JarvisClient::loadPkg(const QString &module)
+{
+    sendQueueStream << static_cast<quint8>(5) << module;
+    addedToQueue();
+}
