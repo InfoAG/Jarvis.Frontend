@@ -1,6 +1,6 @@
 #include "JarvisClient.h"
 
-JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : stream(&socket), listStream(&listBuffer, QIODevice::ReadOnly)
+JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket), sendQueueStream(&sendQueue, QIODevice::WriteOnly)
 {
     QObject::connect(&socket, SIGNAL(connected()), this, SLOT(connected()));
     QObject::connect(&socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
@@ -16,182 +16,140 @@ void JarvisClient::connect(const QString &server, quint16 port, const QString &n
 
 void JarvisClient::connected()
 {
-    stream << static_cast<quint8>(1); //version
+    oStream << static_cast<quint8>(1); //version
     connectionState = Version;
-}
-
-bool JarvisClient::receiveString(QString &dest)
-{
-    do {
-        if (stringReceiveState == StringSize) {
-            if (socket.bytesAvailable() >= sizeof(quint32)) {
-                QDataStream(socket.peek(sizeof(quint32))) >> nextBlockSize;
-                nextBlockSize += sizeof(quint32);
-                stringReceiveState = String;
-            } else return false;
-        } else {
-            if (socket.bytesAvailable() >= nextBlockSize) {
-                stream >> dest;
-                stringReceiveState = StringSize;
-                return true;
-            } else return false;
-        }
-    } while (socket.bytesAvailable());
-}
-
-bool JarvisClient::receiveStringList(QList<QString> &dest)
-{
-    do {
-        if (listReceiveState == ListSize) {
-            if (socket.bytesAvailable() >= sizeof(quint32)) {
-                listBuffer += socket.read(sizeof(quint32));
-                listStream.device()->reset();
-                listStream >> nextBlockSize;
-                if (! nextBlockSize) {
-                    dest = QList<QString>();
-                    return true;
-                } else listReceiveState = ItemSize;
-            } else return false;
-        } else if (listReceiveState == ItemSize) {
-            if (socket.bytesAvailable() >= sizeof(quint32)) {
-                QDataStream(socket.peek(sizeof(quint32))) >> itemBlockSize;
-                listBuffer +=  socket.read(sizeof(quint32));
-                listReceiveState = ItemBody;
-            } else return false;
-        } else if (socket.bytesAvailable() >= itemBlockSize) {
-            listBuffer +=  socket.read(itemBlockSize);
-            if (! --nextBlockSize) {
-                listStream.device()->reset();
-                listStream >> dest;
-                listReceiveState = ListSize;
-                return true;
-            } else listReceiveState = ItemSize;
-        } else return false;
-    } while (socket.bytesAvailable());
 }
 
 void JarvisClient::readyRead()
 {
-    QString buffer_3;
+    QString buffer_2, buffer_3;
+    QList<ModulePackage> moduleList;
+
+    streamBuf += socket.readAll();
     do {
+        iStream.device()->reset();
         switch (connectionState) {
         case Version:
-            if (socket.read(1).at(0)) {
-                stream << static_cast<quint8>(1) << name << pwd;
+            if (pop_front()) {
+                oStream << static_cast<quint8>(1) << name << pwd;
                 connectionState = Login;
             } else connectionState = ServerVersion;
             break;
         case ServerVersion:
-            serverVersion = socket.read(1).toUInt();
+            serverVersion = pop_front();
             emit error(WrongVersion);
             connectionState = Version;
         case Login:
-            if (socket.read(1).at(0)) connectionState = Loop;
+            if (pop_front()) setLoop();
             else {
                 emit error(BadLogin);
                 connectionState = ClientAction;
             }
             break;
         case Loop:
-            switch (socket.read(1).at(0)) {
-            case 0: connectionState = EnterScope; break;
-            case 1: connectionState = FuncScope; break;
-            case 2: connectionState = VarScope; break;
+            switch (pop_front()) {
+            case 0: connectionState = ClientEntered; break;
+            case 1: connectionState = FuncDef; break;
+            case 2: connectionState = VarDef; break;
             case 3: connectionState = NewScope; break;
-            case 4: connectionState = MsgScope; break;
+            case 4: connectionState = Msg; break;
+            case 5: connectionState = ClientLeft;
             }
             break;
-        case EnterScope:
-            if (receiveString(buffer)) connectionState = EnterClient;
-            else return;
-            break;
-        case EnterClient:
-            if (receiveString(buffer_2)) {
+        case ClientEntered:
+            iStream >> buffer >> buffer_2;
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
+                userLists[buffer].append(buffer_2);
                 emit newClient(buffer, buffer_2);
-                connectionState = Loop;
+                setLoop();
             } else return;
             break;
-        case LeaveScope:
-            if (receiveString(buffer)) connectionState = LeaveClient;
-            else return;
-            break;
-        case LeaveClient:
-            if (receiveString(buffer_2)) {
+        case ClientLeft:
+            iStream >> buffer >> buffer_2;
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
+                userLists[buffer].removeOne(buffer_2);
                 emit clientLeft(buffer, buffer_2);
-                connectionState = Loop;
+                setLoop();
             } else return;
-            break;
-        case FuncScope:
-            if (receiveString(buffer)) connectionState = FuncDef;
-            else return;
             break;
         case FuncDef:
-            if (receiveString(buffer_2)) {
+            iStream >> buffer >> buffer_2;
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
                 emit newFunction(buffer, buffer_2);
-                connectionState = Loop;
+                setLoop();
             } else return;
             break;
-        case VarScope:
-            if (receiveString(buffer)) connectionState = VarDef;
-            else return;
-            break;
         case VarDef:
-            if (receiveString(buffer_2)) {
+            iStream >> buffer >> buffer_2;
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
                 emit newVariable(buffer, buffer_2);
-                connectionState = Loop;
+                setLoop();
             } else return;
             break;
         case NewScope:
-            if (receiveString(buffer)) {
+            iStream >> buffer;
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
                 emit newScope(buffer);
-                connectionState = Loop;
+                setLoop();
             } else return;
             break;
-        case MsgScope:
-            if (receiveString(buffer)) connectionState = MsgClient;
-            else return;
-            break;
-        case MsgClient:
-            if (receiveString(buffer_2)) connectionState = Msg;
-            else return;
-            break;
         case Msg:
-            if (receiveString(buffer_3)) {
+            iStream >> buffer >> buffer_2 >> buffer_3;
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
                 emit msgInScope(buffer, buffer_2, buffer_3);
-                connectionState = Loop;
+                setLoop();
             } else return;
             break;
         case ScopeInfo:
-            if (receiveStringList(userLists[buffer])) connectionState = Loop;
-            else return;
+            iStream >> userLists[buffer];
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
+                setLoop();
+            } else return;
+            break;
+        case Modules:
+            iStream >> moduleList;
+            if (iStream.status() == QDataStream::Ok) {
+                resetStreamBuf();
+                emit receivedModules(moduleList);
+                setLoop();
+            } else return;
             break;
         }
-    } while (socket.bytesAvailable());
+        if (socket.bytesAvailable()) streamBuf += socket.readAll();
+    } while (! streamBuf.isEmpty());
 }
 
 
 void JarvisClient::enterScope(const QString &name)
 {
-    if (connectionState != Loop) throw 0;
-    else {
-        stream << static_cast<quint8>(0) << name;
-        buffer = name;
-        connectionState = ScopeInfo;
-    }
+    sendQueueStream << static_cast<quint8>(0) << name;
+    addedToQueue();
+    buffer = name;
+    connectionState = ScopeInfo;
 }
 
 void JarvisClient::leaveScope(const QString &name)
 {
-    if (connectionState != Loop) throw 0;
-    else {
-        stream << static_cast<quint8>(1) << name;
-    }
+    sendQueueStream << static_cast<quint8>(1) << name;
+    addedToQueue();
 }
 
 void JarvisClient::msgToScope(const QString &scope, const QString &msg)
 {
-    if (connectionState != Loop) throw 0;
-    else {
-        stream << static_cast<quint8>(2) << scope << msg;
-    }
+    sendQueueStream << static_cast<quint8>(2) << scope << msg;
+    addedToQueue();
+}
+
+void JarvisClient::requestModules()
+{
+    sendQueueStream << static_cast<quint8>(3);
+    addedToQueue();
+    connectionState = Modules;
 }

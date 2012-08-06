@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include "JarvisClient.h"
-#include <iostream>
+//#include <iostream>
+#include <QTextStream>
 
 class TerminalPrinter : public QObject
 {
@@ -11,6 +12,7 @@ class TerminalPrinter : public QObject
 
 private:
     JarvisClient &client;
+    QTextStream qtout;
 
 public:
     explicit TerminalPrinter(JarvisClient &client);
@@ -25,6 +27,7 @@ public slots:
     void clientLeft(const QString &scope, const QString &name);
     void msgInScope(const QString &scope, const QString &sender, const QString &msg);
     void error(JarvisClient::ClientError error);
+    void receivedModules(QList<ModulePackage> modulePkgs);
     
 };
 
