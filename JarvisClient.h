@@ -78,7 +78,7 @@ public slots:
     void enterScope(const QString &name);
     void leaveScope(const QString &name) {oStream << static_cast<quint8>(1) << name; }
     void msgToScope(const QString &scope, const QString &msg) { oStream << static_cast<quint8>(2) << scope << msg; }
-    void unloadPkg(const QString &) { oStream << static_cast<quint8>(4) << name; }
+    void unloadPkg(const QString &name) { oStream << static_cast<quint8>(4) << name; }
     void loadPkg(const QString &name) { oStream << static_cast<quint8>(3) << name; }
     void deleteScope(const QString &name) { oStream << static_cast<quint8>(5) << name; }
 };
