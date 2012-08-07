@@ -11,7 +11,7 @@ TerminalPrinter::TerminalPrinter(JarvisClient &client) : client(client), qtout(s
     connect(&client, SIGNAL(clientLeft(const QString &, const QString &)), this, SLOT(clientLeft(const QString &, const QString &)));
     connect(&client, SIGNAL(error(JarvisClient::ClientError)), this, SLOT(error(JarvisClient::ClientError)));
     connect(&client, SIGNAL(pkgLoaded(const ModulePackage &)), this, SLOT(pkgLoaded(const ModulePackage &)));
-    connect(&client, SIGNAL(pkgUnloaded(const ModulePackage &)), this, SLOT(pkgUnloaded(const ModulePackage &)));
+    connect(&client, SIGNAL(pkgUnloaded(const QString &)), this, SLOT(pkgUnloaded(const QString &)));
     connect(&client, SIGNAL(enteredScope(const QString &, const Scope &)), this, SLOT(enteredScope(const QString &, const Scope &)));
     connect(&client, SIGNAL(receivedInitInfo(const QList<QString> &, const QList<ModulePackage> &)), this, SLOT(receivedInitInfo(const QList<QString> &, const QList<ModulePackage> &)));
 }
@@ -77,13 +77,12 @@ void TerminalPrinter::pkgLoaded(const ModulePackage &pkg)
     pkgs.append(pkg);
 }
 
-void TerminalPrinter::pkgUnloaded(const ModulePackage &pkg)
+void TerminalPrinter::pkgUnloaded(const QString &name)
 {
-    qtout << "\nPackage unloaded:\n";
-    printPackage(pkg);
+    qtout << "\nPackage unloaded: " << name << "\n";
     qtout << "(" << currentScope << ")->";
     qtout.flush();
-    pkgs.removeOne(pkg);
+    pkgs.erase(std::remove_if(pkgs.begin(), pkgs.end(), [&](const ModulePackage &pkg) { return pkg.name == name; }));
 }
 
 void TerminalPrinter::enteredScope(const QString &name, const Scope &info)

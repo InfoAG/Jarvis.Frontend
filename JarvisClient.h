@@ -66,7 +66,7 @@ signals:
     void msgInScope(const QString &scope, const QString &sender, const QString &msg);
     void error(JarvisClient::ClientError error);
     void pkgLoaded(const ModulePackage &pkg);
-    void pkgUnloaded(const ModulePackage &pkg);
+    void pkgUnloaded(const QString &name);
     void enteredScope(const QString &name, const Scope &info);
     void receivedInitInfo(const QList<QString> &scopes, const QList<ModulePackage> &pkgs);
     void deletedScope(const QString &name);

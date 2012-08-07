@@ -139,12 +139,12 @@ void JarvisClient::readyRead()
             }
             break;
         case PkgUnloaded: {
-                ModulePackage pkgBuffer;
-                iStream >> pkgBuffer;
+                QString pkgName;
+                iStream >> pkgName;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     connectionState = Loop;
-                    emit pkgUnloaded(pkgBuffer);
+                    emit pkgUnloaded(pkgName);
                 } else return;
             }
             break;
