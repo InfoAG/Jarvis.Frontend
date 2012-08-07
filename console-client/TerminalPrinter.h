@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "JarvisClient.h"
-//#include <iostream>
+#include "ModulePackage.h"
 #include <QTextStream>
 
 class TerminalPrinter : public QObject
@@ -13,6 +13,10 @@ class TerminalPrinter : public QObject
 private:
     JarvisClient &client;
     QTextStream qtout;
+    QString currentScope;
+    QMap<QString, Scope>  scopeByName;
+    QList<ModulePackage> pkgs;
+    void printPackage(const ModulePackage &pkg);
 
 public:
     explicit TerminalPrinter(JarvisClient &client);
@@ -27,7 +31,15 @@ public slots:
     void clientLeft(const QString &scope, const QString &name);
     void msgInScope(const QString &scope, const QString &sender, const QString &msg);
     void error(JarvisClient::ClientError error);
-    void receivedModules(QList<ModulePackage> modulePkgs);
+    void pkgLoaded(const ModulePackage &pkg);
+    void pkgUnloaded(const ModulePackage &pkg);
+    void enteredScope(const QString &name, const Scope &info);
+    void receivedInitInfo(const QList<QString> &scopes, const QList<ModulePackage> &pkgs);
+    void openScope(const QString &name) { currentScope = name; qtout << "\n(" << currentScope << ")->"; qtout.flush(); }
+    void printClients();
+    void printModules();
+    void printScopes();
+    void msgToScope(const QString &msg) { QMetaObject::invokeMethod(&client, "msgToScope", Q_ARG(QString, currentScope), Q_ARG(QString, msg)); }
     
 };
 

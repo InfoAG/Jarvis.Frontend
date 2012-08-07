@@ -12,6 +12,8 @@ struct ModulePackage
     QList<Module> terminals;
     QList<Module> operators;
     QList<Module> functions;
+
+    bool operator==(const ModulePackage &other) { return name == other.name; }
 };
 
 QDataStream &operator>>(QDataStream &stream, ModulePackage &modulePkg);

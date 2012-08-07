@@ -2,6 +2,7 @@
 #define INPUTWORKER_H
 
 #include "JarvisClient.h"
+#include "TerminalPrinter.h"
 
 class Worker : public QObject
 {
@@ -9,33 +10,26 @@ class Worker : public QObject
 
 private:
     JarvisClient &client;
+    TerminalPrinter &printer;
 
 public:
-    Worker(JarvisClient &client) : client(client) {};
+    Worker(JarvisClient &client, TerminalPrinter &printer) : client(client), printer(printer) {};
 
 public slots:
     void doWork() {
         QTextStream qtin(stdin);
-        QTextStream qtout(stdout);
         QString input;
-        QString currentScope;
         for (;;) {
-            qtout << "(" << currentScope << ")->";
-            qtout.flush();
             input = qtin.readLine();
             if (input.startsWith("/enter ")) QMetaObject::invokeMethod(&client, "enterScope", Q_ARG(QString, input.right(input.length() - 7)));
             else if (input.startsWith("/leave ")) QMetaObject::invokeMethod(&client, "leaveScope", Q_ARG(QString, input.right(input.length() - 7)));
-            else if (input.startsWith("/open ")) currentScope = input.right(input.length() - 6);
-            else if (input == "/modules") QMetaObject::invokeMethod(&client, "requestModules");
+            else if (input.startsWith("/open ")) QMetaObject::invokeMethod(&printer, "openScope", Q_ARG(QString, input.right(input.length() - 6)));
+            else if (input == "/modules") QMetaObject::invokeMethod(&printer, "printModules");
             else if (input.startsWith("/unload ")) QMetaObject::invokeMethod(&client, "unloadPkg", Q_ARG(QString, input.right(input.length() - 8)));
             else if (input.startsWith("/load ")) QMetaObject::invokeMethod(&client, "loadPkg", Q_ARG(QString, input.right(input.length() - 6)));
-            else if (input == "/clients") {
-                QList<QString> scopeClients = client.userLists[currentScope];
-                std::for_each(scopeClients.begin(), scopeClients.end(), [&](const QString &it_client) {
-                        qtout << it_client << "\t";
-                    });
-                qtout << endl;
-            } else QMetaObject::invokeMethod(&client, "msgToScope", Q_ARG(QString, currentScope), Q_ARG(QString, input));
+            else if (input == "/clients") QMetaObject::invokeMethod(&printer, "printClients");
+            else if (input == "/scopes") QMetaObject::invokeMethod(&printer, "printScopes");
+            else QMetaObject::invokeMethod(&printer, "msgToScope", Q_ARG(QString, input));
         }
     }
 };

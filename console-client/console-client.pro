@@ -19,11 +19,13 @@ SOURCES += main.cpp \
     JarvisClient.cpp \
     TerminalPrinter.cpp \
     ModulePackage.cpp \
-    Module.cpp
+    Module.cpp \
+    Scope.cpp
 
 HEADERS += \
     JarvisClient.h \
     TerminalPrinter.h \
     InputWorker.h \
     ModulePackage.h \
-    Module.h
+    Module.h \
+    Scope.h

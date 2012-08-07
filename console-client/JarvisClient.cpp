@@ -1,6 +1,6 @@
 #include "JarvisClient.h"
 
-JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket), sendQueueStream(&sendQueue, QIODevice::WriteOnly)
+JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket)
 {
     QObject::connect(&socket, SIGNAL(connected()), this, SLOT(connected()));
     QObject::connect(&socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
@@ -22,9 +22,6 @@ void JarvisClient::connected()
 
 void JarvisClient::readyRead()
 {
-    QString buffer_2, buffer_3;
-    QList<ModulePackage> moduleList;
-
     streamBuf += socket.readAll();
     do {
         iStream.device()->reset();
@@ -40,10 +37,21 @@ void JarvisClient::readyRead()
             emit error(WrongVersion);
             connectionState = Version;
         case Login:
-            if (pop_front()) setLoop();
+            if (pop_front()) connectionState = InitInfo;
             else {
                 emit error(BadLogin);
                 connectionState = ClientAction;
+            }
+            break;
+        case InitInfo: {
+                QList<ModulePackage> moduleListBuffer;
+                QStringList stringListBuffer;
+                iStream >> stringListBuffer >> moduleListBuffer;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit receivedInitInfo(stringListBuffer, moduleListBuffer);
+                    connectionState = Loop;
+                } else return;
             }
             break;
         case Loop:
@@ -53,73 +61,103 @@ void JarvisClient::readyRead()
             case 2: connectionState = VarDef; break;
             case 3: connectionState = NewScope; break;
             case 4: connectionState = Msg; break;
-            case 5: connectionState = ClientLeft;
+            case 5: connectionState = ClientLeft; break;
+            case 6: connectionState = PkgLoaded; break;
+            case 7: connectionState = PkgUnloaded; break;
+            case 8: connectionState = ScopeInfo; break;
             }
             break;
-        case ClientEntered:
-            iStream >> buffer >> buffer_2;
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                userLists[buffer].append(buffer_2);
-                emit newClient(buffer, buffer_2);
-                setLoop();
-            } else return;
+        case ClientEntered: {
+                QString scope, name;
+                iStream >> scope >> name;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit newClient(scope, name);
+                    connectionState = Loop;
+                } else return;
+            }
             break;
-        case ClientLeft:
-            iStream >> buffer >> buffer_2;
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                userLists[buffer].removeOne(buffer_2);
-                emit clientLeft(buffer, buffer_2);
-                setLoop();
-            } else return;
+        case ClientLeft: {
+                QString scope, name;
+                iStream >> scope >> name;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit clientLeft(scope, name);
+                    connectionState = Loop;
+                } else return;
+            }
             break;
-        case FuncDef:
-            iStream >> buffer >> buffer_2;
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                emit newFunction(buffer, buffer_2);
-                setLoop();
-            } else return;
+        case FuncDef: {
+                QString scope, def;
+                iStream >> scope >> def;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit newFunction(scope, def);
+                    connectionState = Loop;
+                } else return;
+            }
             break;
-        case VarDef:
-            iStream >> buffer >> buffer_2;
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                emit newVariable(buffer, buffer_2);
-                setLoop();
-            } else return;
+        case VarDef: {
+                QString scope, def;
+                iStream >> scope >> def;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit newVariable(scope, def);
+                    connectionState = Loop;
+                } else return;
+            }
             break;
-        case NewScope:
-            iStream >> buffer;
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                emit newScope(buffer);
-                setLoop();
-            } else return;
+        case NewScope: {
+                QString name;
+                iStream >> name;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit newScope(name);
+                    connectionState = Loop;
+                } else return;
+            }
             break;
-        case Msg:
-            iStream >> buffer >> buffer_2 >> buffer_3;
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                emit msgInScope(buffer, buffer_2, buffer_3);
-                setLoop();
-            } else return;
+        case Msg: {
+                QString scope, sender, msg;
+                iStream >> scope >> sender >> msg;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit msgInScope(scope, sender, msg);
+                    connectionState = Loop;
+                } else return;
+            }
             break;
-        case ScopeInfo:
-            iStream >> userLists[buffer];
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                setLoop();
-            } else return;
+        case PkgLoaded: {
+                ModulePackage pkgBuffer;
+                iStream >> pkgBuffer;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    connectionState = Loop;
+                    emit pkgLoaded(pkgBuffer);
+                } else return;
+            }
             break;
-        case Modules:
-            iStream >> moduleList;
-            if (iStream.status() == QDataStream::Ok) {
-                resetStreamBuf();
-                emit receivedModules(moduleList);
-                setLoop();
-            } else return;
+        case PkgUnloaded: {
+                ModulePackage pkgBuffer;
+                iStream >> pkgBuffer;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    connectionState = Loop;
+                    emit pkgUnloaded(pkgBuffer);
+                } else return;
+            }
+            break;
+        case ScopeInfo: {
+                quint8 byteBuffer;
+                Scope scopeBuffer;
+                iStream >> byteBuffer >> scopeBuffer;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    connectionState = Loop;
+                    emit enteredScope(requestBuffer[byteBuffer], scopeBuffer);
+                    requestBuffer.erase(byteBuffer);
+                } else return;
+            }
             break;
         }
         if (socket.bytesAvailable()) streamBuf += socket.readAll();
@@ -129,39 +167,34 @@ void JarvisClient::readyRead()
 
 void JarvisClient::enterScope(const QString &name)
 {
-    sendQueueStream << static_cast<quint8>(0) << name;
-    addedToQueue();
-    buffer = name;
-    connectionState = ScopeInfo;
+    quint8 requestID;
+    if (requestBuffer.empty() || requestBuffer.begin()->first != 0) requestID = 0;
+    else {
+        requestID = std::adjacent_find(requestBuffer.begin(), requestBuffer.end(), [](const std::pair<const quint8, QString> &first, const std::pair<const quint8, QString> &second) {
+                return (second.first - first.first) > 1;
+            })->first;
+    }
+    oStream << static_cast<quint8>(0) << requestID << name;
+    requestBuffer.insert(std::make_pair(requestID, name));
 }
 
 void JarvisClient::leaveScope(const QString &name)
 {
-    sendQueueStream << static_cast<quint8>(1) << name;
-    addedToQueue();
+    oStream << static_cast<quint8>(1) << name;
 }
 
 void JarvisClient::msgToScope(const QString &scope, const QString &msg)
 {
-    sendQueueStream << static_cast<quint8>(2) << scope << msg;
-    addedToQueue();
-}
-
-void JarvisClient::requestModules()
-{
-    sendQueueStream << static_cast<quint8>(3);
-    addedToQueue();
-    connectionState = Modules;
-}
-
-void JarvisClient::unloadPkg(const QString &module)
-{
-    sendQueueStream << static_cast<quint8>(4) << module;
-    addedToQueue();
+    oStream << static_cast<quint8>(2) << scope << msg;
 }
 
 void JarvisClient::loadPkg(const QString &module)
 {
-    sendQueueStream << static_cast<quint8>(5) << module;
-    addedToQueue();
+    oStream << static_cast<quint8>(3) << module;
 }
+
+void JarvisClient::unloadPkg(const QString &module)
+{
+    oStream << static_cast<quint8>(4) << module;
+}
+
