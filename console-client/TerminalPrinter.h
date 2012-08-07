@@ -2,7 +2,7 @@
 #define TERMINALPRINTER_H
 
 #include <QObject>
-#include "JarvisClient.h"
+#include "../JarvisClient.h"
 #include "ModulePackage.h"
 #include <QTextStream>
 
@@ -40,6 +40,7 @@ public slots:
     void printModules();
     void printScopes();
     void msgToScope(const QString &msg) { QMetaObject::invokeMethod(&client, "msgToScope", Q_ARG(QString, currentScope), Q_ARG(QString, msg)); }
+    void deletedScope(const QString &name);
     
 };
 

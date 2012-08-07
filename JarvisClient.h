@@ -29,7 +29,8 @@ private:
         Msg,
         PkgLoaded,
         PkgUnloaded,
-        ScopeInfo
+        ScopeInfo,
+        ScopeDeleted
     } connectionState;
 
     QTcpSocket socket;
@@ -67,16 +68,18 @@ signals:
     void pkgUnloaded(const ModulePackage &pkg);
     void enteredScope(const QString &name, const Scope &info);
     void receivedInitInfo(const QList<QString> &scopes, const QList<ModulePackage> &pkgs);
+    void deletedScope(const QString &name);
     
 public slots:
     void connected();
     void readyRead();
 
-    void enterScope(const QString &);
-    void leaveScope(const QString &);
-    void msgToScope(const QString &, const QString &);
-    void unloadPkg(const QString &);
-    void loadPkg(const QString &);
+    void enterScope(const QString &name);
+    void leaveScope(const QString &name) {oStream << static_cast<quint8>(1) << name; }
+    void msgToScope(const QString &scope, const QString &msg) { oStream << static_cast<quint8>(2) << scope << msg; }
+    void unloadPkg(const QString &) { oStream << static_cast<quint8>(4) << name; }
+    void loadPkg(const QString &name) { oStream << static_cast<quint8>(3) << name; }
+    void deleteScope(const QString &name) { oStream << static_cast<quint8>(5) << name; }
 };
 
 #endif // JARVISCLIENT_H

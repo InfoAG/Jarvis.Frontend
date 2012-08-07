@@ -65,6 +65,7 @@ void JarvisClient::readyRead()
             case 6: connectionState = PkgLoaded; break;
             case 7: connectionState = PkgUnloaded; break;
             case 8: connectionState = ScopeInfo; break;
+            case 9: connectionState = ScopeDeleted; break;
             }
             break;
         case ClientEntered: {
@@ -159,6 +160,15 @@ void JarvisClient::readyRead()
                 } else return;
             }
             break;
+        case ScopeDeleted: {
+                QString name;
+                iStream >> name;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    connectionState = Loop;
+                    emit deletedScope(name);
+                }
+            }
         }
         if (socket.bytesAvailable()) streamBuf += socket.readAll();
     } while (! streamBuf.isEmpty());
@@ -177,24 +187,3 @@ void JarvisClient::enterScope(const QString &name)
     oStream << static_cast<quint8>(0) << requestID << name;
     requestBuffer.insert(std::make_pair(requestID, name));
 }
-
-void JarvisClient::leaveScope(const QString &name)
-{
-    oStream << static_cast<quint8>(1) << name;
-}
-
-void JarvisClient::msgToScope(const QString &scope, const QString &msg)
-{
-    oStream << static_cast<quint8>(2) << scope << msg;
-}
-
-void JarvisClient::loadPkg(const QString &module)
-{
-    oStream << static_cast<quint8>(3) << module;
-}
-
-void JarvisClient::unloadPkg(const QString &module)
-{
-    oStream << static_cast<quint8>(4) << module;
-}
-

@@ -16,14 +16,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    JarvisClient.cpp \
+    ../JarvisClient.cpp \
     TerminalPrinter.cpp \
     ModulePackage.cpp \
     Module.cpp \
     Scope.cpp
 
 HEADERS += \
-    JarvisClient.h \
+    ../JarvisClient.h \
     TerminalPrinter.h \
     InputWorker.h \
     ModulePackage.h \

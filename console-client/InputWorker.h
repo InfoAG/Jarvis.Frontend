@@ -1,7 +1,7 @@
 #ifndef INPUTWORKER_H
 #define INPUTWORKER_H
 
-#include "JarvisClient.h"
+#include "../JarvisClient.h"
 #include "TerminalPrinter.h"
 
 class Worker : public QObject
@@ -27,6 +27,7 @@ public slots:
             else if (input == "/modules") QMetaObject::invokeMethod(&printer, "printModules");
             else if (input.startsWith("/unload ")) QMetaObject::invokeMethod(&client, "unloadPkg", Q_ARG(QString, input.right(input.length() - 8)));
             else if (input.startsWith("/load ")) QMetaObject::invokeMethod(&client, "loadPkg", Q_ARG(QString, input.right(input.length() - 6)));
+            else if (input.startsWith("/delete ")) QMetaObject::invokeMethod(&client, "deleteScope", Q_ARG(QString, input.right(input.length() - 8)));
             else if (input == "/clients") QMetaObject::invokeMethod(&printer, "printClients");
             else if (input == "/scopes") QMetaObject::invokeMethod(&printer, "printScopes");
             else QMetaObject::invokeMethod(&printer, "msgToScope", Q_ARG(QString, input));

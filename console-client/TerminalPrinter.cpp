@@ -5,6 +5,7 @@ TerminalPrinter::TerminalPrinter(JarvisClient &client) : client(client), qtout(s
     connect(&client, SIGNAL(msgInScope(const QString &, const QString &, const QString &)), this, SLOT(msgInScope(const QString &, const QString &, const QString &)));
     connect(&client, SIGNAL(newFunction(const QString &, const QString &)), this, SLOT(newFunction(const QString &, const QString &)));
     connect(&client, SIGNAL(newScope(const QString &)), this, SLOT(newScope(const QString &)));
+    connect(&client, SIGNAL(deletedScope(const QString &)), this, SLOT(deletedScope(const QString &)));
     connect(&client, SIGNAL(newVariable(const QString &, const QString &)), this, SLOT(newVariable(const QString &, const QString &)));
     connect(&client, SIGNAL(newClient(const QString &, const QString &)), this, SLOT(newClient(const QString &, const QString &)));
     connect(&client, SIGNAL(clientLeft(const QString &, const QString &)), this, SLOT(clientLeft(const QString &, const QString &)));
@@ -123,6 +124,14 @@ void TerminalPrinter::printScopes()
     for (const auto &scope : scopeByName.keys()) qtout << scope << "\t";
     qtout << "\n(" << currentScope << ")->";
     qtout.flush();
+}
+
+void TerminalPrinter::deletedScope(const QString &name)
+{
+    qtout << "Deleted scope " << name << "\n";
+    qtout << "(" << currentScope << ")->";
+    qtout.flush();
+    scopeByName.remove(name);
 }
 
 void TerminalPrinter::printModules()
