@@ -50,6 +50,7 @@ public:
         WrongVersion
     };
 
+    JarvisClient() {};
     JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd);
     void connect(const QString &server, quint16 port, const QString &name, const QString &pwd);
     void disconnect();
