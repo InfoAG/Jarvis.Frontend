@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "../JarvisClient.h"
-#include "ModulePackage.h"
+#include "../ModulePackage.h"
 #include <QTextStream>
 
 class TerminalPrinter : public QObject
@@ -41,6 +41,7 @@ public slots:
     void printScopes();
     void msgToScope(const QString &msg) { QMetaObject::invokeMethod(&client, "msgToScope", Q_ARG(QString, currentScope), Q_ARG(QString, msg)); }
     void deletedScope(const QString &name);
+    void disconnected() { qtout << "\nDisconnected!\n"; qtout.flush(); }
     
 };
 

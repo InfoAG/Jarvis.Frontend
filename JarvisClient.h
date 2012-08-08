@@ -70,11 +70,13 @@ signals:
     void enteredScope(const QString &name, const Scope &info);
     void receivedInitInfo(const QList<QString> &scopes, const QList<ModulePackage> &pkgs);
     void deletedScope(const QString &name);
-    
-public slots:
+    void disconnected();
+
+private slots:
     void connected();
     void readyRead();
-
+    
+public slots:
     void enterScope(const QString &name);
     void leaveScope(const QString &name) {oStream << static_cast<quint8>(1) << name; }
     void msgToScope(const QString &scope, const QString &msg) { oStream << static_cast<quint8>(2) << scope << msg; }

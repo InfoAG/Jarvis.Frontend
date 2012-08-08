@@ -2,8 +2,9 @@
 
 JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket)
 {
-    QObject::connect(&socket, SIGNAL(connected()), this, SLOT(connected()));
-    QObject::connect(&socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+    QObject::connect(&socket, SIGNAL(connected()), SLOT(connected()));
+    QObject::connect(&socket, SIGNAL(readyRead()), SLOT(readyRead()));
+    QObject::connect(&socket, SIGNAL(disconnected()), SIGNAL(disconnected()));
     connect(server, port, name, pwd);
 }
 

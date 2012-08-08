@@ -1,19 +1,20 @@
-#include "TerminalPrinter.h"
+ #include "TerminalPrinter.h"
 
 TerminalPrinter::TerminalPrinter(JarvisClient &client) : client(client), qtout(stdout)
 {
-    connect(&client, SIGNAL(msgInScope(const QString &, const QString &, const QString &)), this, SLOT(msgInScope(const QString &, const QString &, const QString &)));
-    connect(&client, SIGNAL(newFunction(const QString &, const QString &)), this, SLOT(newFunction(const QString &, const QString &)));
-    connect(&client, SIGNAL(newScope(const QString &)), this, SLOT(newScope(const QString &)));
-    connect(&client, SIGNAL(deletedScope(const QString &)), this, SLOT(deletedScope(const QString &)));
-    connect(&client, SIGNAL(newVariable(const QString &, const QString &)), this, SLOT(newVariable(const QString &, const QString &)));
-    connect(&client, SIGNAL(newClient(const QString &, const QString &)), this, SLOT(newClient(const QString &, const QString &)));
-    connect(&client, SIGNAL(clientLeft(const QString &, const QString &)), this, SLOT(clientLeft(const QString &, const QString &)));
-    connect(&client, SIGNAL(error(JarvisClient::ClientError)), this, SLOT(error(JarvisClient::ClientError)));
-    connect(&client, SIGNAL(pkgLoaded(const ModulePackage &)), this, SLOT(pkgLoaded(const ModulePackage &)));
-    connect(&client, SIGNAL(pkgUnloaded(const QString &)), this, SLOT(pkgUnloaded(const QString &)));
-    connect(&client, SIGNAL(enteredScope(const QString &, const Scope &)), this, SLOT(enteredScope(const QString &, const Scope &)));
-    connect(&client, SIGNAL(receivedInitInfo(const QList<QString> &, const QList<ModulePackage> &)), this, SLOT(receivedInitInfo(const QList<QString> &, const QList<ModulePackage> &)));
+    connect(&client, SIGNAL(msgInScope(const QString &, const QString &, const QString &)), SLOT(msgInScope(const QString &, const QString &, const QString &)));
+    connect(&client, SIGNAL(newFunction(const QString &, const QString &)), SLOT(newFunction(const QString &, const QString &)));
+    connect(&client, SIGNAL(newScope(const QString &)), SLOT(newScope(const QString &)));
+    connect(&client, SIGNAL(deletedScope(const QString &)), SLOT(deletedScope(const QString &)));
+    connect(&client, SIGNAL(newVariable(const QString &, const QString &)), SLOT(newVariable(const QString &, const QString &)));
+    connect(&client, SIGNAL(newClient(const QString &, const QString &)), SLOT(newClient(const QString &, const QString &)));
+    connect(&client, SIGNAL(clientLeft(const QString &, const QString &)), SLOT(clientLeft(const QString &, const QString &)));
+    connect(&client, SIGNAL(error(JarvisClient::ClientError)), SLOT(error(JarvisClient::ClientError)));
+    connect(&client, SIGNAL(pkgLoaded(const ModulePackage &)), SLOT(pkgLoaded(const ModulePackage &)));
+    connect(&client, SIGNAL(pkgUnloaded(const QString &)), SLOT(pkgUnloaded(const QString &)));
+    connect(&client, SIGNAL(enteredScope(const QString &, const Scope &)), SLOT(enteredScope(const QString &, const Scope &)));
+    connect(&client, SIGNAL(receivedInitInfo(const QList<QString> &, const QList<ModulePackage> &)), SLOT(receivedInitInfo(const QList<QString> &, const QList<ModulePackage> &)));
+    connect(&client, SIGNAL(disconnected()), SLOT(disconnected()));
 }
 
 void TerminalPrinter::newScope(const QString &name)
