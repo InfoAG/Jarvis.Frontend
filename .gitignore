@@ -13,3 +13,6 @@
 
 # IDE-dependent project-files
 *.user
+Makefile*
+debug/
+release/
