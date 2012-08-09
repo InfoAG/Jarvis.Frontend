@@ -1,17 +1,17 @@
 #include "JarvisClient.h"
 
-JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &name, const QString &pwd) : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket)
+JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &nick, const QString &pwd) : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket)
 {
     QObject::connect(&socket, SIGNAL(connected()), SLOT(connected()));
     QObject::connect(&socket, SIGNAL(readyRead()), SLOT(readyRead()));
     QObject::connect(&socket, SIGNAL(disconnected()), SIGNAL(disconnected()));
-    connect(server, port, name, pwd);
+    connect(server, port, nick, pwd);
 }
 
-void JarvisClient::connect(const QString &server, quint16 port, const QString &name, const QString &pwd)
+void JarvisClient::connect(const QString &server, quint16 port, const QString &nick, const QString &pwd)
 {
     socket.connectToHost(server, port);
-    this->name = name;
+    nick_ = nick;
     this->pwd = pwd;
 }
 
@@ -29,12 +29,12 @@ void JarvisClient::readyRead()
         switch (connectionState) {
         case Version:
             if (pop_front()) {
-                oStream << static_cast<quint8>(1) << name << pwd;
+                oStream << static_cast<quint8>(1) << nick_ << pwd;
                 connectionState = Login;
             } else connectionState = ServerVersion;
             break;
         case ServerVersion:
-            serverVersion = pop_front();
+            serverVersion_ = pop_front();
             emit error(WrongVersion);
             connectionState = Version;
         case Login:
