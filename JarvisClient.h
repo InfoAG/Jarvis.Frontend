@@ -53,6 +53,7 @@ private:
      */
     quint8 pop_front() { quint8 result(streamBuf.at(0)); streamBuf.remove(0, 1); return result; }
     void resetStreamBuf() { streamBuf.remove(0, iStream.device()->pos()); } //!< Remove all bytes from streamBuf which have been read through iStream
+    void connectSlots(); //!< Connect all private slots to signals from socket
 
 public:
     enum ClientError {
@@ -60,7 +61,7 @@ public:
         WrongVersion    //!< Version mismatch
     };
 
-    JarvisClient() {} //!< Constructor
+    JarvisClient() : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket) { connectSlots(); } //!< Constructor
     /**
      * Construct a JarvisClient and connect immediately
      * @param server Server
@@ -76,7 +77,7 @@ public:
      * @param name Nick
      * @param pwd Password
      */
-    void connect(const QString &server, quint16 port, const QString &nick, const QString &pwd);
+    Q_INVOKABLE void connect(const QString &server, quint16 port, const QString &nick, const QString &pwd);
     void disconnect();
 
     quint8 serverVersion() const { return serverVersion_; } //!< @return Server version

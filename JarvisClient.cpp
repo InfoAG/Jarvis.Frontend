@@ -2,9 +2,7 @@
 
 JarvisClient::JarvisClient(const QString &server, quint16 port, const QString &nick, const QString &pwd) : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket)
 {
-    QObject::connect(&socket, SIGNAL(connected()), SLOT(connected()));
-    QObject::connect(&socket, SIGNAL(readyRead()), SLOT(readyRead()));
-    QObject::connect(&socket, SIGNAL(disconnected()), SIGNAL(disconnected()));
+    connectSlots();
     connect(server, port, nick, pwd);
 }
 
@@ -187,4 +185,12 @@ void JarvisClient::enterScope(const QString &name)
     }
     oStream << static_cast<quint8>(0) << requestID << name;
     requestBuffer.insert(std::make_pair(requestID, name));
+    }
+
+
+void JarvisClient::connectSlots()
+{
+    QObject::connect(&socket, SIGNAL(connected()), SLOT(connected()));
+    QObject::connect(&socket, SIGNAL(readyRead()), SLOT(readyRead()));
+    QObject::connect(&socket, SIGNAL(disconnected()), SIGNAL(disconnected()));
 }
