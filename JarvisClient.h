@@ -40,7 +40,7 @@ private:
     } connectionState; //!< Connection state
 
     QTcpSocket socket; //!< Socket with server connection
-    QDataStream iStream, oStream;
+    QDataStream iStream, oStream; //!< Input and output streams for socket
     QString nick_; //!< Client name
     QString pwd; //!< Password
     quint8 serverVersion_; //!< Server version
@@ -78,7 +78,6 @@ public:
      * @param pwd Password
      */
     Q_INVOKABLE void connect(const QString &server, quint16 port, const QString &nick, const QString &pwd);
-    void disconnect();
 
     quint8 serverVersion() const { return serverVersion_; } //!< @return Server version
     QString nick() const { return nick_; } //!< @return Nick
@@ -190,6 +189,7 @@ public slots:
      * @param name Scope name
      */
     void deleteScope(const QString &name) { oStream << static_cast<quint8>(5) << name; }
+    void disconnect() { socket.disconnectFromHost(); } //!< Disconnect from server
 };
 
 #endif // JARVISCLIENT_H
