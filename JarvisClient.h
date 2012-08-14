@@ -143,10 +143,10 @@ signals:
     void enteredScope(const QString &name, const Scope &info);
     /**
      * Received server wide info after login
-     * @param scopes List of scope names
-     * @param pkgs List of module packages
+     * @param scopes List of scope names (T = QList<QString>)
+     * @param pkgs List of module packages (T = QList<ModulePackage>)
      */
-    void receivedInitInfo(const QList<QString> &scopes, const QList<ModulePackage> &pkgs);
+    void receivedInitInfo(const QVariant &scopes, const QVariant &pkgs);
     /**
      * A scope was deleted
      * @param name Scope name

@@ -48,7 +48,7 @@ void JarvisClient::readyRead()
                 iStream >> stringListBuffer >> moduleListBuffer;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit receivedInitInfo(stringListBuffer, moduleListBuffer);
+                    emit receivedInitInfo(QVariant::fromValue(stringListBuffer), QVariant::fromValue(moduleListBuffer));
                     connectionState = Loop;
                 } else return;
             }
@@ -185,7 +185,7 @@ void JarvisClient::enterScope(const QString &name)
     }
     oStream << static_cast<quint8>(0) << requestID << name;
     requestBuffer.insert(std::make_pair(requestID, name));
-    }
+}
 
 
 void JarvisClient::connectSlots()

@@ -4,6 +4,7 @@
 #include <QString>
 #include <QDataStream>
 #include <QList>
+#include <QMetaType>
 #include "Module.h"
 
 /**
@@ -17,6 +18,8 @@ struct ModulePackage
     QList<Module> operators; //!< List of operator modules
     QList<Module> functions; //!< List of function modules
 };
+
+Q_DECLARE_METATYPE(QList<ModulePackage>)
 
 /**
  * Extracts a module package from stream
