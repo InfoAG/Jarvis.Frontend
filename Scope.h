@@ -4,6 +4,7 @@
 #include <QList>
 #include <QString>
 #include <QDataStream>
+#include <QMap>
 
 /**
  * Contains all info about a scope
@@ -11,7 +12,8 @@
 struct Scope
 {
     QList<QString> clients; //!< List of clients subscribed to this scope
-    //TODO: definitions
+    QMap<QString, QString> variables;
+    QMap<QString, QString> functions;
 };
 
 /**

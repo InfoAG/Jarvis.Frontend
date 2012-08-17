@@ -2,6 +2,6 @@
 
 QDataStream &operator>>(QDataStream &stream, Scope &scope)
 {
-    stream >> scope.clients;
+    stream >> scope.clients >> scope.variables >> scope.functions;
     return stream;
 }

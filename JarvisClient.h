@@ -94,12 +94,7 @@ signals:
      * @param def Definition
      */
     void newFunction(const QString &scope, const QString &def);
-    /**
-     * New variable definition
-     * @param scope Scope name
-     * @param def Definition
-     */
-    void newVariable(const QString &scope, const QString &def);
+    void newVariable(const QString &scope, const QString &identifier, const QString &definition);
     /**
      * New client
      * @param scope Scope name
