@@ -5,6 +5,7 @@
 #include <QString>
 #include <QDataStream>
 #include <QMap>
+#include <QMetaType>
 
 /**
  * Contains all info about a scope
@@ -15,6 +16,8 @@ struct Scope
     QMap<QString, QString> variables;
     QMap<QString, QString> functions;
 };
+
+Q_DECLARE_METATYPE(Scope)
 
 /**
  * Extracts a scope from the stream

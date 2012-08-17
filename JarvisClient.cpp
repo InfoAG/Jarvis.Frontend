@@ -63,7 +63,7 @@ void JarvisClient::readyRead()
             case 5: connectionState = ClientLeft; break;
             case 6: connectionState = PkgLoaded; break;
             case 7: connectionState = PkgUnloaded; break;
-            case 8: connectionState = ScopeInfo; break;
+            case 8: connectionState = ScopeInfoHead; break;
             case 9: connectionState = ScopeDeleted; break;
             }
             break;
@@ -133,7 +133,7 @@ void JarvisClient::readyRead()
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     connectionState = Loop;
-                    emit pkgLoaded(pkgBuffer);
+                    emit pkgLoaded(QVariant::fromValue(pkgBuffer));
                 } else return;
             }
             break;
@@ -147,15 +147,27 @@ void JarvisClient::readyRead()
                 } else return;
             }
             break;
+        case ScopeInfoHead: {
+                quint8 success;
+                iStream >> requestID >> success;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    if (success) connectionState = ScopeInfo;
+                    else {
+                        requestBuffer.erase(requestID);
+                        emit error(AlreadyInScope);
+                    }
+                } else return;
+            }
+            break;
         case ScopeInfo: {
-                quint8 byteBuffer;
                 Scope scopeBuffer;
-                iStream >> byteBuffer >> scopeBuffer;
+                iStream >> scopeBuffer;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     connectionState = Loop;
-                    emit enteredScope(requestBuffer[byteBuffer], scopeBuffer);
-                    requestBuffer.erase(byteBuffer);
+                    emit enteredScope(requestBuffer[requestID], QVariant::fromValue(scopeBuffer));
+                    requestBuffer.erase(requestID);
                 } else return;
             }
             break;

@@ -20,6 +20,7 @@ struct ModulePackage
 };
 
 Q_DECLARE_METATYPE(QList<ModulePackage>)
+Q_DECLARE_METATYPE(ModulePackage)
 
 /**
  * Extracts a module package from stream

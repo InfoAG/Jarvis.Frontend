@@ -35,6 +35,7 @@ private:
         Msg,            //!< Message in one of my scopes, expecting scope name, sender name & msg string
         PkgLoaded,      //!< Modulepackage unloaded, awaiting name
         PkgUnloaded,    //!< Modulepackage loaded, waiting for pkg info
+        ScopeInfoHead,
         ScopeInfo,      //!< Entered scope, getting clients & definitions
         ScopeDeleted    //!< Scope deleted, receiving scope name
     } connectionState; //!< Connection state
@@ -43,7 +44,7 @@ private:
     QDataStream iStream, oStream; //!< Input and output streams for socket
     QString nick_; //!< Client name
     QString pwd; //!< Password
-    quint8 serverVersion_; //!< Server version
+    quint8 requestID, serverVersion_; //!< Server version
     QByteArray streamBuf; //!< Stream buffer, needed because QDataStream can fail after stealing all the data from QTcpSocket
     std::map<quint8, QString> requestBuffer; //!< Maps string buffers to request ids until server answers
 
@@ -58,7 +59,8 @@ private:
 public:
     enum ClientError {
         BadLogin,       //!< Server rejected login
-        WrongVersion    //!< Version mismatch
+        WrongVersion,    //!< Version mismatch
+        AlreadyInScope
     };
 
     JarvisClient() : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket) { connectSlots(); } //!< Constructor
@@ -121,9 +123,9 @@ signals:
     void error(JarvisClient::ClientError error);
     /**
      * New module package loaded
-     * @param pkg Package content
+     * @param pkg Package content (T = ModulePackage)
      */
-    void pkgLoaded(const ModulePackage &pkg);
+    void pkgLoaded(const QVariant &pkg);
     /**
      * Module package unloaded
      * @param name Package name
@@ -132,9 +134,9 @@ signals:
     /**
      * Successfully entered a scope
      * @param name Scope name
-     * @param info Scope clients and definitions
+     * @param info Scope clients and definitions (T = Scope)
      */
-    void enteredScope(const QString &name, const Scope &info);
+    void enteredScope(const QString &name, const QVariant &info);
     /**
      * Received server wide info after login
      * @param scopes List of scope names (T = QList<QString>)
