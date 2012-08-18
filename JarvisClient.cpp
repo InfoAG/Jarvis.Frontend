@@ -88,11 +88,12 @@ void JarvisClient::readyRead()
             }
             break;
         case FuncDef: {
-                QString scope, def;
-                iStream >> scope >> def;
+                QString scope, id, def;
+                QStringList args;
+                iStream >> scope >> id >> args >> def;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit newFunction(scope, def);
+                    emit newFunction(scope, id, args, def);
                     connectionState = Loop;
                 } else return;
             }

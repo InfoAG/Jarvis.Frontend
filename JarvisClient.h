@@ -90,12 +90,7 @@ signals:
      * @param name Scope name
      */
     void newScope(const QString &name);
-    /**
-     * New function definition
-     * @param scope Scope name
-     * @param def Definition
-     */
-    void newFunction(const QString &scope, const QString &def);
+    void newFunction(const QString &scope, const QString &identifier, const QStringList &arguments, const QString &def);
     void newVariable(const QString &scope, const QString &identifier, const QString &definition);
     /**
      * New client
