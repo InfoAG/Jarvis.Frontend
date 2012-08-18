@@ -6,6 +6,8 @@
 #include <QDataStream>
 #include <QMap>
 #include <QMetaType>
+#include <QPair>
+#include <QStringList>
 
 /**
  * Contains all info about a scope
@@ -14,7 +16,7 @@ struct Scope
 {
     QList<QString> clients; //!< List of clients subscribed to this scope
     QMap<QString, QString> variables;
-    QMap<QString, QString> functions;
+    QMap<QString, QPair<QStringList, QString>> functions;
 };
 
 Q_DECLARE_METATYPE(Scope)
