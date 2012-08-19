@@ -50,7 +50,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     emit receivedInitInfo(QVariant::fromValue(stringListBuffer), QVariant::fromValue(moduleListBuffer));
                     connectionState = Loop;
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case Loop:
@@ -74,7 +77,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     emit newClient(scope, name);
                     connectionState = Loop;
-                } else return;
+                } else  {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case ClientLeft: {
@@ -84,7 +90,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     emit clientLeft(scope, name);
                     connectionState = Loop;
-                } else return;
+                } else  {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case FuncDef: {
@@ -95,7 +104,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     emit newFunction(scope, id, args, def);
                     connectionState = Loop;
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case VarDef: {
@@ -105,7 +117,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     emit newVariable(scope, identifier, definition);
                     connectionState = Loop;
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case NewScope: {
@@ -115,7 +130,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     emit newScope(name);
                     connectionState = Loop;
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case Msg: {
@@ -125,7 +143,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     emit msgInScope(scope, sender, msg);
                     connectionState = Loop;
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case PkgLoaded: {
@@ -135,7 +156,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     connectionState = Loop;
                     emit pkgLoaded(QVariant::fromValue(pkgBuffer));
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case PkgUnloaded: {
@@ -145,7 +169,10 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     connectionState = Loop;
                     emit pkgUnloaded(pkgName);
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case ScopeInfoHead: {
@@ -158,7 +185,10 @@ void JarvisClient::readyRead()
                         requestBuffer.erase(requestID);
                         emit error(AlreadyInScope);
                     }
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case ScopeInfo: {
@@ -169,7 +199,10 @@ void JarvisClient::readyRead()
                     connectionState = Loop;
                     emit enteredScope(requestBuffer[requestID], QVariant::fromValue(scopeBuffer));
                     requestBuffer.erase(requestID);
-                } else return;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
             }
             break;
         case ScopeDeleted: {
@@ -179,6 +212,9 @@ void JarvisClient::readyRead()
                     resetStreamBuf();
                     connectionState = Loop;
                     emit deletedScope(name);
+                } else {
+                    iStream.resetStatus();
+                    return;
                 }
             }
         }
