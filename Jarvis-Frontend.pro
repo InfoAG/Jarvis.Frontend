@@ -17,13 +17,17 @@ SOURCES += \
     Scope.cpp \
     ModulePackage.cpp \
     Module.cpp \
-    JarvisClient.cpp
+    JarvisClient.cpp \
+    FunctionModule.cpp \
+    OperatorModule.cpp
 
 HEADERS  += \
     Scope.h \
     ModulePackage.h \
     Module.h \
-    JarvisClient.h
+    JarvisClient.h \
+    OperatorModule.h \
+    FunctionModule.h
 
 OTHER_FILES += \
     README.md \

@@ -12,7 +12,9 @@
 *.a
 
 # IDE-dependent project-files
-*.user
+*pro.user*
+
+# other
 Makefile*
 debug/
 release/

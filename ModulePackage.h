@@ -6,6 +6,8 @@
 #include <QList>
 #include <QMetaType>
 #include "Module.h"
+#include "OperatorModule.h"
+#include "FunctionModule.h"
 
 /**
  * Package of server modules
@@ -15,8 +17,8 @@ struct ModulePackage
 {
     QString name;
     QList<Module> terminals; //!< List of terminal modules
-    QList<Module> operators; //!< List of operator modules
-    QList<Module> functions; //!< List of function modules
+    QList<OperatorModule> operators; //!< List of operator modules
+    QList<FunctionModule> functions; //!< List of function modules
 };
 
 Q_DECLARE_METATYPE(QList<ModulePackage>)
