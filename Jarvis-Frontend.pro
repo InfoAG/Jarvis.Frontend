@@ -9,8 +9,8 @@ QT -= gui
 
 TARGET = Jarvis-Frontend
 TEMPLATE = lib
-Debug: DESTDIR = $$PWD/debug
-Release: DESTDIR = $$PWD/release
+debug: DESTDIR = $$PWD/debug
+release: DESTDIR = $$PWD/release
 QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += \
