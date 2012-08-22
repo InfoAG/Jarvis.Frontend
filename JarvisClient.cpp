@@ -48,7 +48,7 @@ void JarvisClient::readyRead()
                 iStream >> stringListBuffer >> moduleListBuffer;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit receivedInitInfo(QVariant::fromValue(stringListBuffer), QVariant::fromValue(moduleListBuffer));
+                    emit receivedInitInfo(stringListBuffer, moduleListBuffer);
                     connectionState = Loop;
                 } else {
                     iStream.resetStatus();
@@ -155,7 +155,7 @@ void JarvisClient::readyRead()
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     connectionState = Loop;
-                    emit pkgLoaded(QVariant::fromValue(pkgBuffer));
+                    emit pkgLoaded(pkgBuffer);
                 } else {
                     iStream.resetStatus();
                     return;
@@ -197,7 +197,7 @@ void JarvisClient::readyRead()
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     connectionState = Loop;
-                    emit enteredScope(requestBuffer[requestID], QVariant::fromValue(scopeBuffer));
+                    emit enteredScope(requestBuffer[requestID], scopeBuffer);
                     requestBuffer.erase(requestID);
                 } else {
                     iStream.resetStatus();

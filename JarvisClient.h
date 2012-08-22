@@ -118,9 +118,9 @@ signals:
     void error(JarvisClient::ClientError error);
     /**
      * New module package loaded
-     * @param pkg Package content (T = ModulePackage)
+     * @param pkg Package content
      */
-    void pkgLoaded(const QVariant &pkg);
+    void pkgLoaded(const ModulePackage &pkg);
     /**
      * Module package unloaded
      * @param name Package name
@@ -129,15 +129,15 @@ signals:
     /**
      * Successfully entered a scope
      * @param name Scope name
-     * @param info Scope clients and definitions (T = Scope)
+     * @param info Scope clients and definitions
      */
-    void enteredScope(const QString &name, const QVariant &info);
+    void enteredScope(const QString &name, const Scope &info);
     /**
      * Received server wide info after login
-     * @param scopes List of scope names (T = QList<QString>)
-     * @param pkgs List of module packages (T = QList<ModulePackage>)
+     * @param scopes List of scope names
+     * @param pkgs List of module packages
      */
-    void receivedInitInfo(const QVariant &scopes, const QVariant &pkgs);
+    void receivedInitInfo(const QStringList &scopes, const QList<ModulePackage> &pkgs);
     /**
      * A scope was deleted
      * @param name Scope name

@@ -19,8 +19,6 @@ struct Scope
     QMap<QString, QPair<QStringList, QString>> functions;
 };
 
-Q_DECLARE_METATYPE(Scope)
-
 /**
  * Extracts a scope from the stream
  * @return A reference to the stream

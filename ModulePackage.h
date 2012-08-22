@@ -21,9 +21,6 @@ struct ModulePackage
     QList<FunctionModule> functions; //!< List of function modules
 };
 
-Q_DECLARE_METATYPE(QList<ModulePackage>)
-Q_DECLARE_METATYPE(ModulePackage)
-
 /**
  * Extracts a module package from stream
  * @return A reference to the stream
