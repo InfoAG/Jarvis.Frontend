@@ -1,7 +1,7 @@
 #ifndef SCOPE_H
 #define SCOPE_H
 
-#include <QList>
+#include <QStringList>
 #include <QString>
 #include <QDataStream>
 #include <QMap>
@@ -14,7 +14,7 @@
  */
 struct Scope
 {
-    QList<QString> clients; //!< List of clients subscribed to this scope
+    QStringList clients; //!< List of clients subscribed to this scope
     QMap<QString, QString> variables;
     QMap<QString, QPair<QStringList, QString>> functions;
 };

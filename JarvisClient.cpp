@@ -184,6 +184,7 @@ void JarvisClient::readyRead()
                     else {
                         requestBuffer.erase(requestID);
                         emit error(AlreadyInScope);
+                        connectionState = Loop;
                     }
                 } else {
                     iStream.resetStatus();
