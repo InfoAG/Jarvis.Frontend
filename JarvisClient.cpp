@@ -68,6 +68,9 @@ void JarvisClient::readyRead()
             case 7: connectionState = PkgUnloaded; break;
             case 8: connectionState = ScopeInfoHead; break;
             case 9: connectionState = ScopeDeleted; break;
+            case 10:
+                oStream << static_cast<quint8>(7);
+                break;
             }
             break;
         case ClientEntered: {
