@@ -22,5 +22,7 @@ QDataStream &operator>>(QDataStream &stream, OperatorModule &module)
         stream >> byteBuf;
         module.associativity.second = static_cast<OperatorModule::AssociativityType>(byteBuf);
     }
+    stream >> byteBuf;
+    module.needsParseForMatch = byteBuf;
     return stream;
 }

@@ -16,6 +16,7 @@ struct OperatorModule : public Module
     std::shared_ptr<QString> matches;
     std::pair<bool, unsigned int> priority;
     std::pair<bool, AssociativityType> associativity;
+    bool needsParseForMatch;
 };
 
 QDataStream &operator>>(QDataStream &stream, OperatorModule &module);

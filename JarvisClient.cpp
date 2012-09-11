@@ -15,6 +15,7 @@ void JarvisClient::connect(const QString &server, quint16 port, const QString &n
 
 void JarvisClient::connected()
 {
+    oStream.resetStatus();
     oStream << static_cast<quint8>(1); //version
     connectionState = Version;
 }
