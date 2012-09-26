@@ -1,5 +1,5 @@
-#ifndef SCOPE_H
-#define SCOPE_H
+#ifndef ROOM_H
+#define ROOM_H
 
 #include <QStringList>
 #include <QString>
@@ -12,7 +12,7 @@
 /**
  * Contains all info about a scope
  */
-struct Scope
+struct Room
 {
     QStringList clients; //!< List of clients subscribed to this scope
     QMap<QString, QString> variables;
@@ -23,6 +23,6 @@ struct Scope
  * Extracts a scope from the stream
  * @return A reference to the stream
  */
-QDataStream &operator>>(QDataStream &stream, Scope &scope);
+QDataStream &operator>>(QDataStream &stream, Room &scope);
 
-#endif // SCOPE_H
+#endif // ROOM_H

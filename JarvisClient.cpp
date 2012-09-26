@@ -62,24 +62,24 @@ void JarvisClient::readyRead()
             case 0: connectionState = ClientEntered; break;
             case 1: connectionState = FuncDef; break;
             case 2: connectionState = VarDef; break;
-            case 3: connectionState = NewScope; break;
+            case 3: connectionState = NewRoom; break;
             case 4: connectionState = Msg; break;
             case 5: connectionState = ClientLeft; break;
             case 6: connectionState = PkgLoaded; break;
             case 7: connectionState = PkgUnloaded; break;
-            case 8: connectionState = ScopeInfoHead; break;
-            case 9: connectionState = ScopeDeleted; break;
+            case 8: connectionState = RoomInfoHead; break;
+            case 9: connectionState = RoomDeleted; break;
             case 10:
                 oStream << static_cast<quint8>(7);
                 break;
             }
             break;
         case ClientEntered: {
-                QString scope, name;
-                iStream >> scope >> name;
+                QString room, name;
+                iStream >> room >> name;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit newClient(scope, name);
+                    emit newClient(room, name);
                     connectionState = Loop;
                 } else  {
                     iStream.resetStatus();
@@ -88,11 +88,11 @@ void JarvisClient::readyRead()
             }
             break;
         case ClientLeft: {
-                QString scope, name;
-                iStream >> scope >> name;
+                QString room, name;
+                iStream >> room >> name;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit clientLeft(scope, name);
+                    emit clientLeft(room, name);
                     connectionState = Loop;
                 } else  {
                     iStream.resetStatus();
@@ -101,12 +101,12 @@ void JarvisClient::readyRead()
             }
             break;
         case FuncDef: {
-                QString scope, id, def;
+                QString room, id, def;
                 QStringList args;
-                iStream >> scope >> id >> args >> def;
+                iStream >> room >> id >> args >> def;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit newFunction(scope, id, args, def);
+                    emit newFunction(room, id, args, def);
                     connectionState = Loop;
                 } else {
                     iStream.resetStatus();
@@ -115,11 +115,11 @@ void JarvisClient::readyRead()
             }
             break;
         case VarDef: {
-                QString scope, identifier, definition;
-                iStream >> scope >> identifier >> definition;
+                QString room, identifier, definition;
+                iStream >> room >> identifier >> definition;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit newVariable(scope, identifier, definition);
+                    emit newVariable(room, identifier, definition);
                     connectionState = Loop;
                 } else {
                     iStream.resetStatus();
@@ -127,12 +127,12 @@ void JarvisClient::readyRead()
                 }
             }
             break;
-        case NewScope: {
+        case NewRoom: {
                 QString name;
                 iStream >> name;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit newScope(name);
+                    emit newRoom(name);
                     connectionState = Loop;
                 } else {
                     iStream.resetStatus();
@@ -141,11 +141,11 @@ void JarvisClient::readyRead()
             }
             break;
         case Msg: {
-                QString scope, sender, msg;
-                iStream >> scope >> sender >> msg;
+                QString room, sender, msg;
+                iStream >> room >> sender >> msg;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit msgInScope(scope, sender, msg);
+                    emit msgInRoom(room, sender, msg);
                     connectionState = Loop;
                 } else {
                     iStream.resetStatus();
@@ -179,15 +179,15 @@ void JarvisClient::readyRead()
                 }
             }
             break;
-        case ScopeInfoHead: {
+        case RoomInfoHead: {
                 quint8 success;
                 iStream >> requestID >> success;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    if (success) connectionState = ScopeInfo;
+                    if (success) connectionState = RoomInfo;
                     else {
                         requestBuffer.erase(requestID);
-                        emit error(AlreadyInScope);
+                        emit error(AlreadyInRoom);
                         connectionState = Loop;
                     }
                 } else {
@@ -196,13 +196,13 @@ void JarvisClient::readyRead()
                 }
             }
             break;
-        case ScopeInfo: {
-                Scope scopeBuffer;
-                iStream >> scopeBuffer;
+        case RoomInfo: {
+                Room roomBuffer;
+                iStream >> roomBuffer;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     connectionState = Loop;
-                    emit enteredScope(requestBuffer[requestID], scopeBuffer);
+                    emit enteredRoom(requestBuffer[requestID], roomBuffer);
                     requestBuffer.erase(requestID);
                 } else {
                     iStream.resetStatus();
@@ -210,13 +210,13 @@ void JarvisClient::readyRead()
                 }
             }
             break;
-        case ScopeDeleted: {
+        case RoomDeleted: {
                 QString name;
                 iStream >> name;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     connectionState = Loop;
-                    emit deletedScope(name);
+                    emit deletedRoom(name);
                 } else {
                     iStream.resetStatus();
                     return;
@@ -228,7 +228,7 @@ void JarvisClient::readyRead()
 }
 
 
-void JarvisClient::enterScope(const QString &name)
+void JarvisClient::enterRoom(const QString &name)
 {
     quint8 requestID;
     if (requestBuffer.empty() || requestBuffer.begin()->first != 0) requestID = 0;

@@ -4,7 +4,7 @@
 #include <QTcpSocket>
 #include <QStringList>
 #include "ModulePackage.h"
-#include "Scope.h"
+#include "Room.h"
 #include <map>
 #include <algorithm>
 #include <utility>
@@ -25,19 +25,19 @@ private:
         Version,        //!< Sent client version, waiting for validation
         ServerVersion,  //!< Version mismatch, awaiting server version
         Login,          //!< Sent login info, waiting for validation
-        InitInfo,       //!< Logged in, awaiting scope names & modules
+        InitInfo,       //!< Logged in, awaiting room names & modules
         Loop,           //!< Expecting packet type id
-        ClientEntered,  //!< Client entered a scope I am subscribed to, expecting scope name & client name
-        ClientLeft,     //!< Client left a scope I am subscribed to, expecting scope name & client name
-        FuncDef,        //!< New function definition in one of my scopes, awaiting scope name & definition
-        VarDef,         //!< New variable definition in one of my scopes, awaiting scope name & definition
-        NewScope,       //!< New scope, need scope name
-        Msg,            //!< Message in one of my scopes, expecting scope name, sender name & msg string
+        ClientEntered,  //!< Client entered a room I am subscribed to, expecting room name & client name
+        ClientLeft,     //!< Client left a room I am subscribed to, expecting room name & client name
+        FuncDef,        //!< New function definition in one of my rooms, awaiting room name & definition
+        VarDef,         //!< New variable definition in one of my rooms, awaiting room name & definition
+        NewRoom,       //!< New room, need room name
+        Msg,            //!< Message in one of my rooms, expecting room name, sender name & msg string
         PkgLoaded,      //!< Modulepackage unloaded, awaiting name
         PkgUnloaded,    //!< Modulepackage loaded, waiting for pkg info
-        ScopeInfoHead,
-        ScopeInfo,      //!< Entered scope, getting clients & definitions
-        ScopeDeleted    //!< Scope deleted, receiving scope name
+        RoomInfoHead,
+        RoomInfo,      //!< Entered room, getting clients & definitions
+        RoomDeleted    //!< Room deleted, receiving room name
     } connectionState; //!< Connection state
 
     QTcpSocket socket; //!< Socket with server connection
@@ -60,7 +60,7 @@ public:
     enum ClientError {
         BadLogin,       //!< Server rejected login
         WrongVersion,    //!< Version mismatch
-        AlreadyInScope
+        AlreadyInRoom
     };
 
     JarvisClient() : iStream(&streamBuf, QIODevice::ReadOnly), oStream(&socket) { connectSlots(); } //!< Constructor
@@ -86,31 +86,31 @@ public:
 
 signals:
     /**
-     * New scope added
-     * @param name Scope name
+     * New room added
+     * @param name Room name
      */
-    void newScope(const QString &name);
-    void newFunction(const QString &scope, const QString &identifier, const QStringList &arguments, const QString &def);
-    void newVariable(const QString &scope, const QString &identifier, const QString &definition);
+    void newRoom(const QString &name);
+    void newFunction(const QString &room, const QString &identifier, const QStringList &arguments, const QString &def);
+    void newVariable(const QString &room, const QString &identifier, const QString &definition);
     /**
      * New client
-     * @param scope Scope name
+     * @param room Room name
      * @param nick Nick
      */
-    void newClient(const QString &scope, const QString &nick);
+    void newClient(const QString &room, const QString &nick);
     /**
-     * Client left a scope
-     * @param scope Scope name
+     * Client left a room
+     * @param room Room name
      * @param nick Nick
      */
-    void clientLeft(const QString &scope, const QString &nick);
+    void clientLeft(const QString &room, const QString &nick);
     /**
      * Message arrived
-     * @param scope Scope name
+     * @param room Room name
      * @param sender Sender nick
      * @param msg Message string
      */
-    void msgInScope(const QString &scope, const QString &sender, const QString &msg);
+    void msgInRoom(const QString &room, const QString &sender, const QString &msg);
     /**
      * An error occurred
      * @param error Error type
@@ -127,22 +127,22 @@ signals:
      */
     void pkgUnloaded(const QString &name);
     /**
-     * Successfully entered a scope
-     * @param name Scope name
-     * @param info Scope clients and definitions
+     * Successfully entered a room
+     * @param name Room name
+     * @param info Room clients and definitions
      */
-    void enteredScope(const QString &name, const Scope &info);
+    void enteredRoom(const QString &name, const Room &info);
     /**
      * Received server wide info after login
-     * @param scopes List of scope names
+     * @param rooms List of room names
      * @param pkgs List of module packages
      */
-    void receivedInitInfo(const QStringList &scopes, const QList<ModulePackage> &pkgs);
+    void receivedInitInfo(const QStringList &rooms, const QList<ModulePackage> &pkgs);
     /**
-     * A scope was deleted
-     * @param name Scope name
+     * A room was deleted
+     * @param name Room name
      */
-    void deletedScope(const QString &name);
+    void deletedRoom(const QString &name);
     void disconnected(); //!< Client disconnected from server
 
 private slots:
@@ -151,21 +151,21 @@ private slots:
     
 public slots:
     /**
-     * Enter a scope
-     * @param name Scope name
+     * Enter a room
+     * @param name Room name
      */
-    void enterScope(const QString &name);
+    void enterRoom(const QString &name);
     /**
-     * Leave a scope
-     * @param name Scope name
+     * Leave a room
+     * @param name Room name
      */
-    void leaveScope(const QString &name) {oStream << static_cast<quint8>(1) << name; }
+    void leaveRoom(const QString &name) {oStream << static_cast<quint8>(1) << name; }
     /**
-     * Send a message to a scope
-     * @param scope Scope name
+     * Send a message to a room
+     * @param room Room name
      * @param msg Message string
      */
-    void msgToScope(const QString &scope, const QString &msg) { oStream << static_cast<quint8>(2) << scope << msg; }
+    void msgToRoom(const QString &room, const QString &msg) { oStream << static_cast<quint8>(2) << room << msg; }
     /**
      * Unload a module package
      * @param name Package name
@@ -177,10 +177,10 @@ public slots:
      */
     void loadPkg(const QString &name) { oStream << static_cast<quint8>(3) << name; }
     /**
-     * Delete a scope
-     * @param name Scope name
+     * Delete a room
+     * @param name Room name
      */
-    void deleteScope(const QString &name) { oStream << static_cast<quint8>(5) << name; }
+    void deleteRoom(const QString &name) { oStream << static_cast<quint8>(5) << name; }
     void disconnect() { socket.disconnectFromHost(); } //!< Disconnect from server
 };
 

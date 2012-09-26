@@ -14,7 +14,7 @@ release: DESTDIR = $$PWD/release
 QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += \
-    Scope.cpp \
+    Room.cpp \
     ModulePackage.cpp \
     Module.cpp \
     JarvisClient.cpp \
@@ -22,7 +22,7 @@ SOURCES += \
     OperatorModule.cpp
 
 HEADERS  += \
-    Scope.h \
+    Room.h \
     ModulePackage.h \
     Module.h \
     JarvisClient.h \
