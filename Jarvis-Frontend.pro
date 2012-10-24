@@ -19,7 +19,9 @@ SOURCES += \
     Module.cpp \
     JarvisClient.cpp \
     FunctionModule.cpp \
-    OperatorModule.cpp
+    OperatorModule.cpp \
+    BinaryOperatorModule.cpp \
+    UnaryOperatorModule.cpp
 
 HEADERS  += \
     Room.h \
@@ -27,7 +29,9 @@ HEADERS  += \
     Module.h \
     JarvisClient.h \
     OperatorModule.h \
-    FunctionModule.h
+    FunctionModule.h \
+    BinaryOperatorModule.h \
+    UnaryOperatorModule.h
 
 OTHER_FILES += \
     README.md \

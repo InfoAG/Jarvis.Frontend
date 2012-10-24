@@ -6,7 +6,8 @@
 #include <QList>
 #include <QMetaType>
 #include "Module.h"
-#include "OperatorModule.h"
+#include "BinaryOperatorModule.h"
+#include "UnaryOperatorModule.h"
 #include "FunctionModule.h"
 
 /**
@@ -17,7 +18,8 @@ struct ModulePackage
 {
     QString name;
     QList<Module> terminals; //!< List of terminal modules
-    QList<OperatorModule> operators; //!< List of operator modules
+    QList<BinaryOperatorModule> binaryOperators; //!< List of operator modules
+    QList<UnaryOperatorModule> unaryOperators;
     QList<FunctionModule> functions; //!< List of function modules
 };
 

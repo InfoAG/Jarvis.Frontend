@@ -8,14 +8,8 @@
 
 struct OperatorModule : public Module
 {
-    enum AssociativityType {
-        LEFT,
-        RIGHT
-    };
-
     std::shared_ptr<QString> matches;
     std::pair<bool, unsigned int> priority;
-    std::pair<bool, AssociativityType> associativity;
     bool needsParseForMatch;
 };
 

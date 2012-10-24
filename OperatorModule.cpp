@@ -15,6 +15,7 @@ QDataStream &operator>>(QDataStream &stream, OperatorModule &module)
         module.priority.first = true;
         stream >> module.priority.second;
     }
+    /*
     stream >> byteBuf;
     if (byteBuf) module.associativity.first = false;
     else {
@@ -22,6 +23,7 @@ QDataStream &operator>>(QDataStream &stream, OperatorModule &module)
         stream >> byteBuf;
         module.associativity.second = static_cast<OperatorModule::AssociativityType>(byteBuf);
     }
+    */
     stream >> byteBuf;
     module.needsParseForMatch = byteBuf;
     return stream;
