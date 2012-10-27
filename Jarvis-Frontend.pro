@@ -31,7 +31,8 @@ HEADERS  += \
     OperatorModule.h \
     FunctionModule.h \
     BinaryOperatorModule.h \
-    UnaryOperatorModule.h
+    UnaryOperatorModule.h \
+    FunctionSignature.h
 
 OTHER_FILES += \
     README.md \

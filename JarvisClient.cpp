@@ -61,7 +61,7 @@ void JarvisClient::readyRead()
             switch (pop_front()) {
             case 0: connectionState = ClientEntered; break;
             case 1: connectionState = FuncDef; break;
-            case 2: connectionState = VarDef; break;
+            case 2: connectionState = VarDeclaration; break;
             case 3: connectionState = NewRoom; break;
             case 4: connectionState = Msg; break;
             case 5: connectionState = ClientLeft; break;
@@ -72,6 +72,7 @@ void JarvisClient::readyRead()
             case 10:
                 oStream << static_cast<quint8>(7);
                 break;
+            case 11: connectionState = VarDefinition; break;
             }
             break;
         case ClientEntered: {
@@ -102,7 +103,7 @@ void JarvisClient::readyRead()
             break;
         case FuncDef: {
                 QString room, id, def;
-                QStringList args;
+                QList<QPair<QString, QString>> args;
                 iStream >> room >> id >> args >> def;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
@@ -114,12 +115,25 @@ void JarvisClient::readyRead()
                 }
             }
             break;
-        case VarDef: {
+        case VarDeclaration: {
+                QString room, identifier, type;
+                iStream >> room >> identifier >> type;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit declaredVariable(room, identifier, type);
+                    connectionState = Loop;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
+            }
+            break;
+        case VarDefinition: {
                 QString room, identifier, definition;
                 iStream >> room >> identifier >> definition;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit newVariable(room, identifier, definition);
+                    emit definedVariable(room, identifier, definition);
                     connectionState = Loop;
                 } else {
                     iStream.resetStatus();

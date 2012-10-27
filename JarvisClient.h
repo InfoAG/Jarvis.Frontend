@@ -30,8 +30,9 @@ private:
         ClientEntered,  //!< Client entered a room I am subscribed to, expecting room name & client name
         ClientLeft,     //!< Client left a room I am subscribed to, expecting room name & client name
         FuncDef,        //!< New function definition in one of my rooms, awaiting room name & definition
-        VarDef,         //!< New variable definition in one of my rooms, awaiting room name & definition
-        NewRoom,       //!< New room, need room name
+        VarDeclaration, //!< New variable declaration in one of my rooms, awaiting room name & definition
+        VarDefinition,
+        NewRoom,        //!< New room, need room name
         Msg,            //!< Message in one of my rooms, expecting room name, sender name & msg string
         PkgLoaded,      //!< Modulepackage unloaded, awaiting name
         PkgUnloaded,    //!< Modulepackage loaded, waiting for pkg info
@@ -90,8 +91,9 @@ signals:
      * @param name Room name
      */
     void newRoom(const QString &name);
-    void newFunction(const QString &room, const QString &identifier, const QStringList &arguments, const QString &def);
-    void newVariable(const QString &room, const QString &identifier, const QString &definition);
+    void newFunction(const QString &room, const QString &identifier, const QList<QPair<QString, QString>> &arguments, const QString &def);
+    void declaredVariable(const QString &room, const QString &identifier, const QString &type);
+    void definedVariable(const QString &room, const QString &identifier, const QString &definition);
     /**
      * New client
      * @param room Room name

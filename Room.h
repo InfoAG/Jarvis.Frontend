@@ -5,9 +5,9 @@
 #include <QString>
 #include <QDataStream>
 #include <QMap>
-#include <QMetaType>
 #include <QPair>
 #include <QStringList>
+#include "FunctionSignature.h"
 
 /**
  * Contains all info about a scope
@@ -15,8 +15,8 @@
 struct Room
 {
     QStringList clients; //!< List of clients subscribed to this scope
-    QMap<QString, QString> variables;
-    QMap<QString, QPair<QStringList, QString>> functions;
+    QMap<QString, QPair<QString, QString>> variables;
+    QMap<FunctionSignature, QPair<QStringList, QString>> functions;
 };
 
 /**
