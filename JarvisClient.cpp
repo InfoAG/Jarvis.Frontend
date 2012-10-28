@@ -117,7 +117,7 @@ void JarvisClient::readyRead()
             break;
         case VarDeclaration: {
                 QString room, identifier, type;
-                iStream >> room >> identifier >> type;
+                iStream >> room >> type >> identifier;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
                     emit declaredVariable(room, identifier, type);
