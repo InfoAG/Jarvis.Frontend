@@ -8,6 +8,7 @@
 #include <QPair>
 #include <QStringList>
 #include "FunctionSignature.h"
+#include "FunctionDefinition.h"
 
 /**
  * Contains all info about a scope
@@ -16,7 +17,7 @@ struct Room
 {
     QStringList clients; //!< List of clients subscribed to this scope
     QMap<QString, QPair<QString, QString>> variables; //!< maps variable identifier to pair of type string and definition string
-    QMap<FunctionSignature, QPair<QStringList, QString>> functions; //!< maps functions signature to pair of argument names and definition string
+    QMap<FunctionSignature, FunctionDefinition> functions; //!< maps functions signature to pair of argument names and definition string
 };
 
 /**

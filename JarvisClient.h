@@ -29,7 +29,8 @@ private:
         Loop,           //!< Expecting packet type id
         ClientEntered,  //!< Client entered a room I am subscribed to, expecting room name & client name
         ClientLeft,     //!< Client left a room I am subscribed to, expecting room name & client name
-        FuncDef,        //!< New function definition in one of my rooms, awaiting room name & definition
+        FuncDeclaration,//!< New function definition in one of my rooms, awaiting room name & definition
+        FuncDefinition,
         VarDeclaration, //!< New variable declaration in one of my rooms, awaiting room name & definition
         VarDefinition,
         NewRoom,        //!< New room, need room name
@@ -91,7 +92,8 @@ signals:
      * @param name Room name
      */
     void newRoom(const QString &name);
-    void newFunction(const QString &room, const QString &identifier, const QList<QPair<QString, QString>> &arguments, const QString &def);
+    void declaredFunction(const QString &room, const FunctionSignature &signature, const QString &returnType);
+    void definedFunction(const QString &room, const QString &identifier, const QList<QPair<QString, QString>> &arguments, const QString &definition);
     void declaredVariable(const QString &room, const QString &identifier, const QString &type);
     void definedVariable(const QString &room, const QString &identifier, const QString &definition);
     /**

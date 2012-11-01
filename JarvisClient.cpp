@@ -60,7 +60,7 @@ void JarvisClient::readyRead()
         case Loop:
             switch (pop_front()) {
             case 0: connectionState = ClientEntered; break;
-            case 1: connectionState = FuncDef; break;
+            case 1: connectionState = FuncDeclaration; break;
             case 2: connectionState = VarDeclaration; break;
             case 3: connectionState = NewRoom; break;
             case 4: connectionState = Msg; break;
@@ -73,6 +73,7 @@ void JarvisClient::readyRead()
                 oStream << static_cast<quint8>(7);
                 break;
             case 11: connectionState = VarDefinition; break;
+            case 12: connectionState = FuncDefinition; break;
             }
             break;
         case ClientEntered: {
@@ -101,13 +102,27 @@ void JarvisClient::readyRead()
                 }
             }
             break;
-        case FuncDef: {
-                QString room, id, def;
-                QList<QPair<QString, QString>> args;
-                iStream >> room >> id >> args >> def;
+        case FuncDeclaration: {
+                QString room, returnType;
+                FunctionSignature sig;
+                iStream >> room >> sig >> returnType;
                 if (iStream.status() == QDataStream::Ok) {
                     resetStreamBuf();
-                    emit newFunction(room, id, args, def);
+                    emit declaredFunction(room, sig, returnType);
+                    connectionState = Loop;
+                } else {
+                    iStream.resetStatus();
+                    return;
+                }
+            }
+            break;
+        case FuncDefinition: {
+                QString room, id, def;
+                QList<QPair<QString, QString>> arguments;
+                iStream >> room >> id >> arguments >> def;
+                if (iStream.status() == QDataStream::Ok) {
+                    resetStreamBuf();
+                    emit definedFunction(room, id, arguments, def);
                     connectionState = Loop;
                 } else {
                     iStream.resetStatus();
